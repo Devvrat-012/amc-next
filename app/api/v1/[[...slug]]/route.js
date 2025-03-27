@@ -1,5 +1,5 @@
 import https from "https";
-
+process.env.NODE_TLS_REJECT_UNAUTHORIZED;
 const agent = new https.Agent({
   rejectUnauthorized: false,
 });

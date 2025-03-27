@@ -1,6 +1,7 @@
 "use client";
 import React, { useState } from "react";
 import PropTypes from "prop-types";
+import "@/app/styles/globals.css";
 
 function YoutubeEmbed({ embedId, id, image }) {
   const [showVideo, setShowVideo] = useState(false);

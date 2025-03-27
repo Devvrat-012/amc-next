@@ -10,6 +10,7 @@ import { MAINPAGE_API_URL } from "@/app/constants/apiUrls";
 import URL from "@/app/constants/urls";
 import LOGIN_TYPE from "@/app/constants/loginType";
 import UI from "@/app/constants/ui";
+import Image from "next/image";
 
 function Demo({ role }) {
   const [demodata, setDemodata] = useState("");
@@ -32,12 +33,10 @@ function Demo({ role }) {
             <div className="row">
               <div className="col-lg-5">
                 <div className="left_wrapper">
-                  <img
+                  <Image
                     src={mobile}
                     alt={UI.ALT_APPROACH_SECTION_HOME_IMAGE}
-                    width="100%"
-                    height="100%"
-                    loading="lazy"
+                    layout="intrinsic"
                   />
                 </div>
               </div>
@@ -82,7 +81,7 @@ function Demo({ role }) {
                   </div>
                 </div>
                 <div className="col-lg-6">
-                  <img
+                  <Image
                     src={approach}
                     alt={UI.ALT_APPROACH_SECTION_HOME_IMAGE}
                     width="100%"

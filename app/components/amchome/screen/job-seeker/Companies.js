@@ -61,7 +61,7 @@ function Companies({ role }) {
                   <div className="slide" key={index}>
                     <div className="slide_div row">
                       <img
-                        src={company.image}
+                        src={`https://demo.alignmycareer.com${company?.image}`}
                         alt={UI.ALT_FEATURED_COMPANIES_IMAGE}
                         width="100%"
                         height="100%"

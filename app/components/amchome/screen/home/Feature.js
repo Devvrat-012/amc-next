@@ -26,6 +26,7 @@ function Feature({ role }) {
     fetchFeatureOneData();
     fetchFeatureTwoData();
   }, [role]);
+ 
 
   return (
     <div className="full-body-tab">

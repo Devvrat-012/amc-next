@@ -8,9 +8,11 @@ import { MAINPAGE_API_URL } from "@/app/constants/apiUrls";
 import LOGIN_TYPE from "@/app/constants/loginType";
 import UI from "@/app/constants/ui";
 import URL from "@/app/constants/urls";
+import Image from "next/image";
 
 function AboutAMC({ role }) {
   const [aboutdata, setAboutdata] = useState(null);
+  console.log(aboutdata);
 
   const fetchAboutData = () => {
     getRequest(`${MAINPAGE_API_URL.MAINPAGE_ABOUT}${role}`).then((data) => {
@@ -22,6 +24,7 @@ function AboutAMC({ role }) {
     if (!role) return;
     fetchAboutData();
   }, [role]);
+  const imageUrl = `https://demo.alignmycareer.com${aboutdata?.image}`;
 
   return (
     <section
@@ -35,11 +38,12 @@ function AboutAMC({ role }) {
             <div className="col-lg-6 col-md-12">
               <div className="section-heading">
                 <h1 className="section_head">{aboutdata.title}</h1>
-                <img
-                  src={aboutdata.image}
-                  alt={UI.ALT_CANDIDATEPAGE_IMAGE}
-                  width="100%"
-                  height="100%"
+                <Image
+                  src={imageUrl}
+                  alt={UI.ALT_ABOUT_SECTION_IMAGE}
+                  layout="intrinsic"
+                  width={1000}
+                  height={1000}
                   loading="lazy"
                 />
               </div>
@@ -58,7 +62,7 @@ function AboutAMC({ role }) {
               </a> */}
 
                 <Link
-                  to={URL.REGISTER}
+                  href={URL.REGISTER}
                   rel="noopener noreferrer"
                   className="white-btn"
                 >

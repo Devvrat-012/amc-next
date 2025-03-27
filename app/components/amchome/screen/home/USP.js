@@ -7,6 +7,7 @@ import arrow from "@/app/assets/arrow.svg";
 import { MAINPAGE_API_URL } from "@/app/constants/apiUrls";
 import LOGIN_TYPE from "@/app/constants/loginType";
 import UI from "@/app/constants/ui";
+import Image from "next/image";
 
 function USP(props) {
   const { role, showHeading } = props;
@@ -27,7 +28,7 @@ function USP(props) {
   const handleUSPClick = (usp) => {
     setSelectedUSP(usp);
   };
-
+  const imageUrl = `https://demo.alignmycareer.com${selectedUSP?.image}`;
   return (
     <div>
       {uspdata.length > 0 ? (
@@ -120,11 +121,13 @@ function USP(props) {
                         </div>
                         <div className="col-lg-5">
                           <div className="right_wrap">
-                            <img
-                              src={selectedUSP.image}
+                            <Image
+                              src={imageUrl}
                               alt={UI.ALT_SKILL_TAB_RIGHT}
-                              width="90%"
-                              height="100%"
+                              layout="intrinsic"
+                              width={900}
+                              height={1000}
+                              loading="lazy"
                             />
                           </div>
                         </div>
