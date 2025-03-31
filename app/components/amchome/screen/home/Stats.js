@@ -1,23 +1,23 @@
-"use client";
-import React, { useState, useEffect } from "react";
 import PropTypes from "prop-types";
-import { getRequest } from "@/app/services";
-import { MAINPAGE_API_URL } from "@/app/constants/apiUrls";
 import LOGIN_TYPE from "@/app/constants/loginType";
+import { MAINPAGE_API_URL } from "@/app/constants/apiUrls";
+import config from "@/app/config/config";
 
-function Stats({ role }) {
-  const [statsdata, setStatsdata] = useState([]);
+async function Stats({ role }) {
+  let statsdata = [];
 
-  const fetchStatsData = () => {
-    getRequest(`${MAINPAGE_API_URL.MAINPAGE_STATS}${role}`).then((data) => {
-      setStatsdata(data);
-    });
-  };
-
-  useEffect(() => {
-    if (!role) return;
-    fetchStatsData();
-  }, [role]);
+  try {
+    const response = await fetch(
+      `${config.API_BASE}/${MAINPAGE_API_URL.MAINPAGE_STATS}${role}`,
+    );
+    if (response.ok) {
+      statsdata = await response.json();
+    } else {
+      console.error(`Error fetching stats: ${response.statusText}`);
+    }
+  } catch (error) {
+    console.error("Failed to fetch stats:", error);
+  }
 
   return (
     <div>
@@ -26,13 +26,12 @@ function Stats({ role }) {
           <div className="container">
             <div className="section-heading centred">
               <h3 className="section_head">
-                {role === LOGIN_TYPE.CANDIDATE && (
+                {role === LOGIN_TYPE.CANDIDATE ? (
                   <>
                     Get the Best IT and Management
                     <br /> Jobs with AlignMyCareer
                   </>
-                )}
-                {role === LOGIN_TYPE.EMPLOYER && (
+                ) : (
                   <>
                     One-Stop Solution for <br />
                     Recruiters
@@ -40,7 +39,6 @@ function Stats({ role }) {
                 )}
               </h3>
             </div>
-
             <div className="row" style={{ rowGap: 20 }}>
               {statsdata.map((stat, index) => (
                 <div className="col-lg-4 col-md-6 col-sm-12 col-12" key={index}>

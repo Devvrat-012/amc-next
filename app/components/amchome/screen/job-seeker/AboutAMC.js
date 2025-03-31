@@ -1,36 +1,31 @@
-"use client";
-import React, { useState, useEffect } from "react";
 import { Skeleton } from "@mui/material";
 import PropTypes from "prop-types";
 import Link from "next/link";
-import { getRequest } from "@/app/services";
 import { MAINPAGE_API_URL } from "@/app/constants/apiUrls";
 import LOGIN_TYPE from "@/app/constants/loginType";
 import UI from "@/app/constants/ui";
 import URL from "@/app/constants/urls";
 import Image from "next/image";
+import config from "@/app/config/config";
 
-function AboutAMC({ role }) {
-  const [aboutdata, setAboutdata] = useState(null);
-  console.log(aboutdata);
+async function AboutAMC({ role }) {
 
-  const fetchAboutData = () => {
-    getRequest(`${MAINPAGE_API_URL.MAINPAGE_ABOUT}${role}`).then((data) => {
-      setAboutdata(data);
-    });
-  };
-
-  useEffect(() => {
-    if (!role) return;
-    fetchAboutData();
-  }, [role]);
-  const imageUrl = `https://demo.alignmycareer.com${aboutdata?.image}`;
+  let aboutdata = null;
+  
+  try {
+    const response = await fetch(`${config.API_BASE}/${MAINPAGE_API_URL.MAINPAGE_ABOUT}${role}`);
+    if (!response.ok) {
+      throw new Error(`Error fetching skills: ${response.statusText}`);
+    }
+    aboutdata = await response.json();
+  } catch (error) {
+    console.error('Failed to fetch skills:', error);
+  }
 
   return (
     <section
-      className={`section time-consuming-sec ${
-        role === LOGIN_TYPE.EMPLOYER && "recruiters_heading pb-0"
-      }`}
+      className={`section time-consuming-sec ${role === LOGIN_TYPE.EMPLOYER && "recruiters_heading pb-0"
+        }`}
     >
       <div className="container">
         {aboutdata ? (
@@ -39,8 +34,8 @@ function AboutAMC({ role }) {
               <div className="section-heading">
                 <h1 className="section_head">{aboutdata.title}</h1>
                 <Image
-                  src={imageUrl}
-                  alt={UI.ALT_ABOUT_SECTION_IMAGE}
+                  src={`${config.ROUTE_BASE}${aboutdata?.image}`}
+                  alt={UI.ALT_CANDIDATEPAGE_IMAGE}
                   layout="intrinsic"
                   width={1000}
                   height={1000}
@@ -51,16 +46,6 @@ function AboutAMC({ role }) {
             <div className="col-lg-6 col-md-12">
               <div className="right-para">
                 <p>{aboutdata.description}</p>
-                {/* <a
-                href="https://www.alignmycareer.com/register"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="white-btn"
-              >
-                Create Your Account
-                <span></span> <span></span> <span></span> <span></span>
-              </a> */}
-
                 <Link
                   href={URL.REGISTER}
                   rel="noopener noreferrer"

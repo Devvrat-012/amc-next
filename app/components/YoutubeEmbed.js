@@ -2,6 +2,8 @@
 import React, { useState } from "react";
 import PropTypes from "prop-types";
 import "@/app/styles/globals.css";
+import Image from "next/image";
+import config from "../config/config";
 
 function YoutubeEmbed({ embedId, id, image }) {
   const [showVideo, setShowVideo] = useState(false);
@@ -28,11 +30,11 @@ function YoutubeEmbed({ embedId, id, image }) {
         />
       ) : (
         <div className="placeholder-image">
-          <img
-            src={image}
+          <Image
+            src={`${config.ROUTE_BASE}${image}`}
             alt="AMC Introduction Youtube Video"
-            width="100%"
-            height="265px"
+            width={400}
+            height={300}
             loading="lazy"
           />
         </div>

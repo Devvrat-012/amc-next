@@ -16,12 +16,13 @@ const onClickOnLike = ({
     ? likedBlogs.filter((id) => id !== blogId)
     : [...likedBlogs, blogId];
 
-  setLikedBlogs(updatedLikedBlogs);
-  localStorage.setItem(
-    STORAGE_KEY.LIKED_BLOGS,
-    JSON.stringify(updatedLikedBlogs)
-  );
-
+  if (typeof window !== "undefined") {
+    setLikedBlogs(updatedLikedBlogs);
+    localStorage.setItem(
+      STORAGE_KEY.LIKED_BLOGS,
+      JSON.stringify(updatedLikedBlogs)
+    );
+  }
   if (setBlogs) {
     setBlogs((prevBlogs) =>
       prevBlogs.map((blog) => {

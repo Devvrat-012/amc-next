@@ -1,18 +1,35 @@
-"use client";
-import React, { useState, useEffect } from "react";
+import React from "react";
 import PropTypes from "prop-types";
-import Slider from "react-slick";
-import "slick-carousel/slick/slick.css";
-import "slick-carousel/slick/slick-theme.css";
-import { getRequest } from "@/app/services";
+import dynamic from "next/dynamic";
 import { MAINPAGE_API_URL } from "@/app/constants/apiUrls";
 import LOGIN_TYPE from "@/app/constants/loginType";
 import UI from "@/app/constants/ui";
+import config from "@/app/config/config";
 
-function Reasons({ role }) {
-  const [reasondata, setReasondata] = useState([]);
+// Dynamically import ReasonsSlider with SSR disabled.
+const ReasonsSlider = dynamic(() => import("./ReasonsSlider"));
 
+async function Reasons({ role }) {
+  let reasondata = [];
+
+  try {
+    const res = await fetch(
+      `${config.API_BASE}/${MAINPAGE_API_URL.MAINPAGE_REASONS}${role}`,
+    );
+    if (res.ok) {
+      reasondata = await res.json();
+    } else {
+      console.error(`Error fetching reasons: ${res.statusText}`);
+    }
+  } catch (error) {
+    console.error("Error fetching reasons:", error);
+  }
+
+  if (reasondata.length === 0) return null;
+
+  // Determine number of slides to show based on data length.
   const slidesToShow = reasondata.length >= 3 ? 3 : reasondata.length;
+
   const settings1 = {
     dots: true,
     infinite: true,
@@ -41,18 +58,7 @@ function Reasons({ role }) {
     ],
   };
 
-  const fetchReasonsData = () => {
-    getRequest(`${MAINPAGE_API_URL.MAINPAGE_REASONS}${role}`).then((data) => {
-      setReasondata(data);
-    });
-  };
-
-  useEffect(() => {
-    if (!role) return;
-    fetchReasonsData();
-  }, [role]);
-
-  return reasondata.length > 0 ? (
+  return (
     <div className="section card_slider">
       <div className="section-heading centred">
         <h3 className="section_head">
@@ -62,26 +68,10 @@ function Reasons({ role }) {
         </h3>
       </div>
       <div className="slides_card">
-        <Slider {...settings1}>
-          {reasondata.map((reason, index) => (
-            <div className="partner-slide slide-1" key={index}>
-              <div className="slide__text">
-                <img
-                  src={reason.image}
-                  alt={UI.ALT_BENEFITS_SLIDER_IMAGE}
-                  width={121}
-                  height={121}
-                  loading="lazy"
-                />
-                <h5>{reason.title}</h5>
-                <p>{reason.description}</p>
-              </div>
-            </div>
-          ))}
-        </Slider>
+        <ReasonsSlider reasondata={reasondata} settings={settings1} />
       </div>
     </div>
-  ) : null;
+  );
 }
 
 Reasons.propTypes = {

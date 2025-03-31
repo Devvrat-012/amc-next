@@ -14,7 +14,6 @@ import {
   getNotificationCountFailure,
 } from './userSlice';
 
-// eslint-disable-next-line import/prefer-default-export
 export const getAvailablePointsUser = async (dispatch) => {
   dispatch(getUserStart());
   try {

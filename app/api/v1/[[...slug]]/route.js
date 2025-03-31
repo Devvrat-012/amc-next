@@ -1,20 +1,26 @@
 import https from "https";
-process.env.NODE_TLS_REJECT_UNAUTHORIZED;
+
 const agent = new https.Agent({
   rejectUnauthorized: false,
 });
 
 async function proxyRequest(request, paramsPromise) {
-  console.log(request, paramsPromise);
-  try {
-    const { slug: pathSegments = [] } = await paramsPromise;
+  // In development, disable TLS rejection warnings
+  if (process.env.NODE_ENV === "development") {
+    process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
+  }
 
+  try {
+    // Retrieve the slug parameter from the route
+    const { slug: pathSegments = [] } = await paramsPromise;
     const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
 
-    const targetUrl = `${baseUrl}/${pathSegments.join("/")}${
-      new URL(request.url).search
-    }`;
+    // Construct the target URL including any search parameters
+    const targetUrl = `${baseUrl}/${pathSegments.join("/")}${new URL(
+      request.url
+    ).search}`;
 
+    // Clone headers and update the host header if needed
     const headers = new Headers(request.headers);
     headers.set("host", process.env.NEXT_PUBLIC_API_BASE);
 
@@ -27,26 +33,24 @@ async function proxyRequest(request, paramsPromise) {
       agent,
     };
 
+    console.log("Proxying request to:", targetUrl);
+
     const response = await fetch(targetUrl, init);
     if (!response.ok) {
       const contentType = response.headers.get("content-type");
       let errorMessage;
-
       if (contentType && contentType.includes("application/json")) {
-        errorMessage = await response.json(); // Parse JSON response
+        errorMessage = await response.json();
       } else {
-        errorMessage = { error: await response.text() }; // Treat as plain text
+        errorMessage = { error: await response.text() };
       }
-
-      return new Response(
-        JSON.stringify(errorMessage), // Always return a proper JSON object
-        {
-          status: response.status,
-          headers: { "Content-Type": "application/json" },
-        }
-      );
+      return new Response(JSON.stringify(errorMessage), {
+        status: response.status,
+        headers: { "Content-Type": "application/json" },
+      });
     }
 
+    // Clean up headers from the proxied response if needed
     const newHeaders = new Headers(response.headers);
     newHeaders.delete("content-encoding");
     if (!newHeaders.has("Content-Type")) {
@@ -58,6 +62,7 @@ async function proxyRequest(request, paramsPromise) {
       headers: newHeaders,
     });
   } catch (error) {
+    console.error("Proxy error:", error);
     return new Response(JSON.stringify({ error: "Internal Server Error" }), {
       status: 500,
       headers: { "Content-Type": "application/json" },
@@ -65,22 +70,28 @@ async function proxyRequest(request, paramsPromise) {
   }
 }
 
-export async function GET(request, context) {
-  return proxyRequest(request, context.params);
+// Each HTTP method is handled here
+export async function GET(request, { params }) {
+  const resolvedParams = await params;
+  return proxyRequest(request, { slug: resolvedParams.slug });
 }
 
-export async function POST(request, context) {
-  return proxyRequest(request, context.params);
+export async function POST(request, { params }) {
+  const resolvedParams = await params;
+  return proxyRequest(request, { slug: resolvedParams.slug });
 }
 
-export async function PUT(request, context) {
-  return proxyRequest(request, context.params);
+export async function PUT(request, { params }) {
+  const resolvedParams = await params;
+  return proxyRequest(request, { slug: resolvedParams.slug });
 }
 
-export async function DELETE(request, context) {
-  return proxyRequest(request, context.params);
+export async function DELETE(request, { params }) {
+  const resolvedParams = await params;
+  return proxyRequest(request, { slug: resolvedParams.slug });
 }
 
-export async function PATCH(request, context) {
-  return proxyRequest(request, context.params);
+export async function PATCH(request, { params }) {
+  const resolvedParams = await params;
+  return proxyRequest(request, { slug: resolvedParams.slug });
 }

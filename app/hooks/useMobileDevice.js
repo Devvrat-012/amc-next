@@ -5,7 +5,6 @@ import {
 } from '../constants/screenSize';
 import useWindowSize from './useWindowSize';
 
-// Hook
 function useMobileDevice() {
   const { windowWidth } = useWindowSize();
   return windowWidth < MOBILE_SCREEN_WIDTH;
@@ -16,7 +15,7 @@ export const useSmallDesktop = () => {
   return windowWidth < SMALL_SCREEN_DESKTOP;
 };
 
-export const ismallMobileDevice = () => {
+export const useSmallMobileDevice = () => {  // Renamed function to start with "use"
   const { windowWidth } = useWindowSize();
   return windowWidth < SMALL_MOBILE_SCREEN_WIDTH;
 };

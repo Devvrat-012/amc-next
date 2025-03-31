@@ -1,8 +1,13 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-    images: {
-        domains: ["demo.alignmycareer.com"],
-      },
+  distDir: "build",
+  
+  experimental: {
+    turbopack: false,
+  },
+  images: {
+    domains: ["demo.alignmycareer.com", "localhost"],
+  },
 };
 
 export default nextConfig;

@@ -1,32 +1,43 @@
-"use client";
-import React, { useState, useEffect } from "react";
+import React from "react";
 import PropTypes from "prop-types";
 import Link from "next/link";
-import { getRequest } from "@/app/services";
 import { MAINPAGE_API_URL } from "@/app/constants/apiUrls";
 import UI from "@/app/constants/ui";
 import URL from "@/app/constants/urls";
+import config from "@/app/config/config";
+import Image from "next/image";
 
-function Feature({ role }) {
-  const [featureone, setFeatureone] = useState("");
-  const [featuretwo, setFeaturetwo] = useState("");
-  const fetchFeatureOneData = () => {
-    getRequest(`${MAINPAGE_API_URL.MAINPAGE_FEATURE_1}${role}`).then((data) => {
-      setFeatureone(data);
-    });
-  };
-  const fetchFeatureTwoData = () => {
-    getRequest(`${MAINPAGE_API_URL.MAINPAGE_FEATURE_2}${role}`).then((data) => {
-      setFeaturetwo(data);
-    });
-  };
+async function Feature({ role }) {
+  let featureone = {};
+  let featuretwo = {};
 
-  useEffect(() => {
-    if (!role) return;
-    fetchFeatureOneData();
-    fetchFeatureTwoData();
-  }, [role]);
- 
+  // Fetch Feature One data
+  try {
+    const resOne = await fetch(
+      `${config.API_BASE}/${MAINPAGE_API_URL.MAINPAGE_FEATURE_1}${role}`
+    );
+    if (resOne.ok) {
+      featureone = await resOne.json();
+    } else {
+      console.error(`Error fetching feature one: ${resOne.statusText}`);
+    }
+  } catch (error) {
+    console.error("Error fetching feature one:", error);
+  }
+
+  // Fetch Feature Two data
+  try {
+    const resTwo = await fetch(
+      `${config.API_BASE}/${MAINPAGE_API_URL.MAINPAGE_FEATURE_2}${role}`
+    );
+    if (resTwo.ok) {
+      featuretwo = await resTwo.json();
+    } else {
+      console.error(`Error fetching feature two: ${resTwo.statusText}`);
+    }
+  } catch (error) {
+    console.error("Error fetching feature two:", error);
+  }
 
   return (
     <div className="full-body-tab">
@@ -38,7 +49,6 @@ function Feature({ role }) {
               <br /> One Platform
             </h2>
           </div>
-
           <div className="card_wrap">
             <div className="row">
               <div className="col-lg-6">
@@ -56,11 +66,11 @@ function Feature({ role }) {
                     <span /> <span /> <span /> <span />
                   </Link>
                   <div className="card_img mt-2">
-                    <img
-                      src={featureone.image}
+                    <Image
+                      src={`${config.ROUTE_BASE}${featureone.image}`}
                       alt={UI.ALT_FEATURE_IMAGE_LEFT}
-                      width="100%"
-                      height="100%"
+                      width={1000}
+                      height={300}
                       loading="lazy"
                     />
                   </div>
@@ -69,11 +79,11 @@ function Feature({ role }) {
               <div className="col-lg-6">
                 <div className="card card_two">
                   <div className="card_img">
-                    <img
-                      src={featuretwo.image}
+                    <Image
+                      src={`${config.ROUTE_BASE}${featuretwo.image}`}
                       alt={UI.ALT_FEATURE_IMAGE_RIGHT}
-                      width="100%"
-                      height="100%"
+                      width={1000}
+                      height={300}
                       loading="lazy"
                     />
                   </div>
@@ -98,7 +108,9 @@ function Feature({ role }) {
     </div>
   );
 }
+
 Feature.propTypes = {
   role: PropTypes.number.isRequired,
 };
+
 export default Feature;

@@ -24,63 +24,55 @@ import onClickOnLike from "./Blog.helper";
 import STORAGE_KEY from "@/app/constants/storageKey";
 import Image from "next/image";
 
-function BlogPage(props) {
-  // const { setShowNavBar } = props;
-  const [Blogs, setBlogs] = useState([]);
-  const [BlogsCount, setBlogsCount] = useState();
+function BlogPageClient({
+  initialBlogs,
+  initialBlogsCount,
+  initialPageNumber,
+  setShowNavBar,
+}) {
+  const [Blogs, setBlogs] = useState(initialBlogs);
+  const [BlogsCount, setBlogsCount] = useState(initialBlogsCount);
   const [shouldShowDialog, setShouldShowDialog] = useState(false);
   const [selectedCard, setSelectedCard] = useState();
-  const [pageNumber, setPageNumber] = useState(1);
+  const [pageNumber, setPageNumber] = useState(initialPageNumber);
   const [loader, setLoader] = useState(false);
-  // Initialize likedBlogs to an empty array.
   const [likedBlogs, setLikedBlogs] = useState([]);
   const isMobileDevice = useSmallMobileDevice();
-
-  // Store window pathname in state (populated on client)
-  const [pathname, setPathname] = useState("");
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      setPathname(window.location.pathname);
-    }
-  }, []);
 
   const router = useRouter();
   const searchParams = useSearchParams();
   const dispatch = useDispatch();
 
-  // Load likedBlogs from localStorage on the client.
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      const storedLikes =
-        JSON.parse(localStorage.getItem(STORAGE_KEY.LIKED_BLOGS)) || [];
-      setLikedBlogs(storedLikes);
-    }
-  }, []);
+    // Load likedBlogs from localStorage on the client.
+    useEffect(() => {
+      if (typeof window !== "undefined") {
+        const storedLikes =
+          JSON.parse(localStorage.getItem(STORAGE_KEY.LIKED_BLOGS)) || [];
+        setLikedBlogs(storedLikes);
+      }
+    }, []);
 
-  // Wrap the function in useCallback to make it stable for useEffect.
-  const getBlogsBasedOnPage = useCallback(
-    (value) => {
-      setLoader(true);
-      getRequest(getBlogsParam(value))
-        .then((res) => {
-          setBlogs(res?.blog);
-          setBlogsCount(res?.count);
-        })
-        .catch((err) => {
-          dispatch(
-            showSnackBar({
-              setopen: true,
-              message: err?.message,
-              severity: "error",
-            })
-          );
-        })
-        .finally(() => {
-          setLoader(false);
-        });
-    },
-    [dispatch]
-  );
+  // Wrap getBlogsBasedOnPage in useCallback so that it is stable and can be added as a dependency.
+  const getBlogsBasedOnPage = useCallback((value) => {
+    setLoader(true);
+    getRequest(getBlogsParam(value))
+      .then((res) => {
+        setBlogs(res?.blog);
+        setBlogsCount(res?.count);
+      })
+      .catch((err) => {
+        dispatch(
+          showSnackBar({
+            setopen: true,
+            message: err?.message,
+            severity: "error",
+          })
+        );
+      })
+      .finally(() => {
+        setLoader(false);
+      });
+  }, [dispatch]);
 
   const onClickBlogCard = (value) => {
     window.location.href = `${URL.BLOG_META}${value}`;
@@ -96,29 +88,18 @@ function BlogPage(props) {
   const pagination = (pageNo) => {
     setPageNumber(pageNo);
     router.push(`${URL.BLOG_PAGE}?page=${pageNo}`);
-    // Optionally, if you want to fetch new blogs on pagination:
-    // getBlogsBasedOnPage(pageNo);
-  };
-
-  const handleLike = (event, id) => {
-    onClickOnLike({
-      event,
-      blogId: id,
-      likedBlogs,
-      setLikedBlogs,
-      dispatch,
-      setBlogs,
-    });
+    getBlogsBasedOnPage(pageNo);
   };
 
   useEffect(() => {
+    // When searchParams change, re-fetch the blogs.
     const page = parseInt(searchParams.get("page"), 10) || 1;
     setPageNumber(page);
     getBlogsBasedOnPage(page);
   }, [searchParams, getBlogsBasedOnPage]);
 
   useEffect(() => {
-    if (Blogs.length > 0 && pathname && pathname !== URL.BLOG_PAGE) {
+    if (Blogs.length > 0 && window.location.pathname !== URL.BLOG_PAGE) {
       setBlogs((prevBlogs) => {
         const newBlogs = Blogs.slice(0, 3);
         if (JSON.stringify(prevBlogs) !== JSON.stringify(newBlogs)) {
@@ -127,23 +108,23 @@ function BlogPage(props) {
         return prevBlogs;
       });
     }
-  }, [Blogs, pathname]);
+  }, [Blogs]);
 
   return (
     <div className={isMobileDevice ? "container-fluid" : "container"}>
       <div
         className={
-          pathname === URL.BLOG_PAGE ? "my-3" : "section-heading"
+          window.location.pathname === URL.BLOG_PAGE ? "my-3" : "section-heading"
         }
       >
         <span
           className={
-            pathname === URL.BLOG_PAGE
+            window.location.pathname === URL.BLOG_PAGE
               ? "headline-5-bold"
               : "section_head"
           }
         >
-          {pathname === URL.BLOG_PAGE
+          {window.location.pathname === URL.BLOG_PAGE
             ? UI.ALL_BLOGS
             : UI.BLOG_SECTION_TITLE}
         </span>
@@ -155,12 +136,12 @@ function BlogPage(props) {
           <div className="blogs-container">
             {Blogs?.map((eachItem) => (
               <div className="card-container card" key={eachItem.id}>
-                <div className="card-image ">
+                <div className="card-image">
                   <Image
                     src={`${API_URL.PHOTO_PRE}${eachItem.image}`}
                     alt={eachItem.imageAltText}
-                    width={500} // adjust as needed
-                    height={300} // adjust as needed
+                    width={500} // Adjust these dimensions as needed
+                    height={300} // Adjust these dimensions as needed
                     loading="lazy"
                   />
                 </div>
@@ -195,7 +176,18 @@ function BlogPage(props) {
                       }}
                     />
                     <div className="d-flex justify-content-between align-items-center py-2">
-                      <div onClick={(event) => handleLike(event, eachItem.id)}>
+                      <div
+                        onClick={(event) =>
+                          onClickOnLike({
+                            event,
+                            blogId: eachItem.id,
+                            likedBlogs,
+                            setLikedBlogs,
+                            dispatch,
+                            setBlogs,
+                          })
+                        }
+                      >
                         {likedBlogs.includes(eachItem.id) ? (
                           <FavoriteIcon
                             fontSize="medium"
@@ -231,7 +223,7 @@ function BlogPage(props) {
           </div>
 
           {/* View More */}
-          {pathname !== URL.BLOG_PAGE && (
+          {window.location.pathname !== URL.BLOG_PAGE && (
             <div
               onClick={() => router.push(URL.BLOG_PAGE)}
               className="viewmore mt-4"
@@ -241,7 +233,7 @@ function BlogPage(props) {
           )}
 
           {/* Pagination */}
-          {Blogs?.length > 0 && pathname === URL.BLOG_PAGE && (
+          {Blogs?.length > 0 && window.location.pathname === URL.BLOG_PAGE && (
             <div className="mt-2">
               <Pagination
                 count={Math.ceil(BlogsCount / PAGINATION_ROWS_12)}
@@ -267,12 +259,15 @@ function BlogPage(props) {
   );
 }
 
-BlogPage.propTypes = {
+BlogPageClient.propTypes = {
+  initialBlogs: PropTypes.array,
+  initialBlogsCount: PropTypes.number,
+  initialPageNumber: PropTypes.number,
   setShowNavBar: PropTypes.func,
 };
 
-BlogPage.defaultProps = {
+BlogPageClient.defaultProps = {
   setShowNavBar: noop,
 };
 
-export default BlogPage;
+export default BlogPageClient;

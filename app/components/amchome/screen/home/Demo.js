@@ -1,8 +1,6 @@
-"use client";
-import React, { useState, useEffect } from "react";
+import React from "react";
 import PropTypes from "prop-types";
 import Link from "next/link";
-import { getRequest } from "@/app/services";
 import "@/app/styles/job-seeker-page.css";
 import mobile from "@/app/assets/mobile.webp";
 import approach from "@/app/assets/approach.webp";
@@ -11,20 +9,27 @@ import URL from "@/app/constants/urls";
 import LOGIN_TYPE from "@/app/constants/loginType";
 import UI from "@/app/constants/ui";
 import Image from "next/image";
+import config from "@/app/config/config"; // Ensure this provides your API_BASE
 
-function Demo({ role }) {
-  const [demodata, setDemodata] = useState("");
+async function Demo({ role }) {
+  let demodata = {};
 
-  const fetchDemoData = () => {
-    getRequest(`${MAINPAGE_API_URL.MAINPAGE_DEMO}${role}`).then((data) => {
-      setDemodata(data);
-    });
-  };
+  // Only fetch demo data if role is candidate
+  if (role === LOGIN_TYPE.CANDIDATE) {
+    try {
+      const response = await fetch(
+        `${config.API_BASE}/${MAINPAGE_API_URL.MAINPAGE_DEMO}${role}`
+      );
+      if (response.ok) {
+        demodata = await response.json();
+      } else {
+        console.error(`Error fetching demo data: ${response.statusText}`);
+      }
+    } catch (error) {
+      console.error("Error fetching demo data:", error);
+    }
+  }
 
-  useEffect(() => {
-    if (!role) return;
-    fetchDemoData();
-  }, [role]);
   return (
     <>
       {role === LOGIN_TYPE.CANDIDATE && (
@@ -43,10 +48,8 @@ function Demo({ role }) {
               <div className="col-lg-7">
                 <div className="right_wrapper">
                   <div className="section-heading">
-                    <h3 className="section_head">
-                      {demodata.title && demodata.title}
-                    </h3>
-                    <p>{demodata.description}</p>
+                    <h3 className="section_head">{demodata?.title}</h3>
+                    <p>{demodata?.description}</p>
                     <Link
                       href={URL.REGISTER}
                       rel="noopener noreferrer"
@@ -97,6 +100,7 @@ function Demo({ role }) {
     </>
   );
 }
+
 Demo.propTypes = {
   role: PropTypes.number.isRequired,
 };

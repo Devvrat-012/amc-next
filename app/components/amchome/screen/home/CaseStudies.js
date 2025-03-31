@@ -9,6 +9,7 @@ import { getRequest } from "@/app/services/index";
 
 import { MAINPAGE_API_URL } from "@/app/constants/apiUrls";
 import UI from "@/app/constants/ui";
+import Image from "next/image";
 
 function CaseStudies({ role }) {
   const [casestudydata, setCasestudydata] = useState([]);
@@ -41,18 +42,16 @@ function CaseStudies({ role }) {
       },
     ],
   };
-  const fetchCaseStudiesData = () => {
-    getRequest(`${MAINPAGE_API_URL.MAINPAGE_CASE_STUDY}${role}`).then(
-      (data) => {
-        setCasestudydata(data);
-      }
-    );
-  };
+
+  const fetchCaseStudiesData = useCallback(() => {
+    getRequest(`${MAINPAGE_API_URL.MAINPAGE_CASE_STUDY}${role}`)
+      .then((data) => setCasestudydata(data));
+  }, [role]);
 
   useEffect(() => {
     if (!role) return;
     fetchCaseStudiesData();
-  }, [role]);
+  }, [role, fetchCaseStudiesData]);
 
   return (
     <div>
@@ -66,7 +65,9 @@ function CaseStudies({ role }) {
               {casestudydata.map((casestudy, index) => (
                 <div className="partner-slide slide-1" key={index}>
                   <div className="slide__text">
-                    <img
+                    <Image
+                      width={300}
+                      height={200}
                       src={casestudy.image}
                       alt={UI.ALT_CASE_STUDIES_IMAGE}
                     />

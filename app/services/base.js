@@ -35,7 +35,7 @@ axiosClient.interceptors.response.use(
         })
       );
     }
-    if (error.response?.status === STATUS_CODE.AUTH401) {
+    if (error.response?.status === STATUS_CODE.AUTH401 && typeof window !== "undefined") {
       localStorage.removeItem(STORAGE_KEY.CANDIDATE_DETAILS);
       localStorage.removeItem(STORAGE_KEY.EMPLOYER_DETAILS);
       localStorage.removeItem(STORAGE_KEY.SESSION_DETAILS);
@@ -43,7 +43,7 @@ axiosClient.interceptors.response.use(
 
       store.dispatch(setShowLoginDialog());
     }
-    return Promise.reject(error.response.data);
+    return Promise.reject(error.response?.data);
   }
 );
 

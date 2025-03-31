@@ -1,5 +1,9 @@
+process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
+
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import ReduxProvider from "./redux/ReduxProvider";
+import Header from "./components/Header";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -19,9 +23,14 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
-      <body className={`${geistSans.variable} ${geistMono.variable}`}>
-        {children}
-      </body>
+      <ReduxProvider>
+        <body className={`${geistSans.variable} ${geistMono.variable}`}>
+          <div className="header-css">
+            <Header />
+          </div>
+          {children}
+        </body>
+      </ReduxProvider>
     </html>
   );
 }

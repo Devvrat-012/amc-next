@@ -16,21 +16,17 @@ import BlogShare from "./BlogShare";
 import onClickOnLike from "./Blog.helper";
 import STORAGE_KEY from "../../constants/storageKey";
 import useMobileDevice from "../../hooks/useMobileDevice";
+import Image from "next/image";
 
-function BlogDetails({ setShowNavBar }) {
+function BlogDetails() {
   const dispatch = useDispatch();
   const [search] = useSearchParams();
   const [data, setData] = useState();
   const [loader, setLoader] = useState(false);
-  const [likedBlogs, setLikedBlogs] = useState(
-    JSON.parse(localStorage.getItem(STORAGE_KEY.LIKED_BLOGS)) || []
-  );
+  // Initialize with empty array for likedBlogs.
+  const [likedBlogs, setLikedBlogs] = useState([]);
   const id = search.get("id");
   const isMobileDevice = useMobileDevice();
-
-  useEffect(() => {
-    setShowNavBar(true);
-  }, []);
 
   const handleLike = (event) => {
     onClickOnLike({
@@ -42,6 +38,15 @@ function BlogDetails({ setShowNavBar }) {
       setData,
     });
   };
+
+  // Load likedBlogs from localStorage only on client side.
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const storedLikes =
+        JSON.parse(localStorage.getItem(STORAGE_KEY.LIKED_BLOGS)) || [];
+      setLikedBlogs(storedLikes);
+    }
+  }, []);
 
   useEffect(() => {
     if (id) {
@@ -63,7 +68,7 @@ function BlogDetails({ setShowNavBar }) {
           setLoader(false);
         });
     }
-  }, [id]);
+  }, [id, dispatch]);
 
   return (
     <div className="container">
@@ -73,9 +78,11 @@ function BlogDetails({ setShowNavBar }) {
         data && (
           <div className={isMobileDevice ? "card p-3" : "card p-5"}>
             <div className="card-detail-image">
-              <img
+              <Image
                 src={`${API_URL.PHOTO_PRE}${data.image}`}
                 alt={data.imageAltText}
+                width={600} // adjust as needed
+                height={400} // adjust as needed
                 loading="lazy"
               />
             </div>
@@ -86,10 +93,8 @@ function BlogDetails({ setShowNavBar }) {
             <div
               className="headline-6 mt-3"
               style={{ lineHeight: "2.5625rem" }}
-              // eslint-disable-next-line react/no-danger
               dangerouslySetInnerHTML={{ __html: marked(data.content) }}
             />
-
             <hr />
             <BlogShare selectedCard={data} />
             <hr />
