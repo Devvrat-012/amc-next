@@ -41,7 +41,7 @@ export default function HeaderClient() {
   };
 
   // Provide fallbacks for other environment variables as well
-  const blogLink = process.env.NEXT_PUBLIC_BLOG_URL || '/';
+  const blogLink = '/next/blog';
   const loginLink = process.env.NEXT_PUBLIC_LOGIN_URL || '/';
   const registerLink = process.env.NEXT_PUBLIC_REGISTER_URL || '/';
 

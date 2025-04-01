@@ -19,7 +19,7 @@ import LOGIN_TYPE from "@/app/constants/loginType";
 import UI from "@/app/constants/ui";
 import AboutAMC from "@/app/components/amchome/screen/job-seeker/AboutAMC";
 import Benefits from "@/app/components/amchome/screen/job-seeker/Benefits";
-import BlogPage from "@/app/pages/Blog/BlogPage";
+import BlogPage from "@/app/next/blog/page.js";
 import Loader from "@/app/loader";
 
 export default async function HomeBody() {
